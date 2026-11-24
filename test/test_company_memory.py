@@ -300,7 +300,7 @@ def test_knowledge_provider_covers_summary_rewrite_and_answer_without_changing_r
     shared={'MODEL':'report-model','BASE_URL':'https://reports.example.test/v1','ARK_API_KEY':'report-key'}
     for key,value in {**shared,'COMPANY_KNOWLEDGE_MODEL':'glm-5.2',
             'COMPANY_KNOWLEDGE_BASE_URL':'https://knowledge-relay.example.test/v1/',
-            'COMPANY_KNOWLEDGE_API_KEY':'knowledge-key'}.items():
+            'COMPANY_KNOWLEDGE_API_KEY':'example-knowledge-relay-key'}.items():
         monkeypatch.setenv(key,value)
     requests=[]
     def handler(request):
@@ -313,7 +313,7 @@ def test_knowledge_provider_covers_summary_rewrite_and_answer_without_changing_r
             return httpx.Response(200,json={'data':{'nodes':[{'metadata':{
                 'doc_id':'cloud-a','content':'豆包提供广告与企业服务。'}}]}})
         assert str(request.url)=='https://knowledge-relay.example.test/v1/chat/completions'
-        assert request.headers['Authorization']=='Bearer knowledge-key'
+        assert request.headers['Authorization']=='Bearer example-knowledge-relay-key'
         assert body['model']=='glm-5.2'
         assert body['thinking']=={'type':'disabled'} and 'enable_thinking' not in body
         if not body['stream']:
@@ -344,8 +344,8 @@ def test_knowledge_provider_covers_summary_rewrite_and_answer_without_changing_r
 
 
 @pytest.mark.parametrize('failure', ['permission','timeout','invalid-json','non-object'])
-def test_rewrite_service_failures_are_not_reported_as_ambiguous_questions(env,monkeypatch,failure):
-    upstream(monkeypatch);sid=create(env);call(env,sid)
+def test_rewrite_distinguishes_service_failures_from_invalid_output(env,monkeypatch,failure):
+    requests=upstream(monkeypatch);sid=create(env);call(env,sid)
     async def fail(*args,**kwargs):
         if failure=='permission':raise kb.provider_error(403,provider='知识库模型')
         if failure=='timeout':raise TimeoutError()
@@ -353,10 +353,15 @@ def test_rewrite_service_failures_are_not_reported_as_ambiguous_questions(env,mo
         return 'broken JSON'
     monkeypatch.setattr(memory,'complete',fail)
     response=call(env,sid,'那么它呢？','failed-rewrite')
-    assert '未能确认' not in response.text and '"type": "done"' not in response.text
+    assert '未能确认' not in response.text
+    assert sum(path.endswith('/retrieve') for path, _ in requests)==1
+    if failure in {'invalid-json', 'non-object'}:
+        assert '这次追问未能完整续接' in response.text and '"type": "saved"' in response.text
+        assert '"type": "error"' not in response.text
+        return
+    assert '"type": "done"' not in response.text
     assert '"type": "error"' in response.text
-    assert {'permission':'知识库模型访问权限不足','timeout':'追问补全服务响应超时',
-        'invalid-json':'追问补全服务返回格式异常','non-object':'追问补全服务返回格式异常'}[failure] in response.text
+    assert {'permission':'知识库模型访问权限不足','timeout':'追问补全服务响应超时'}[failure] in response.text
 
 
 def test_complete_table_question_after_first_answer_does_not_need_rewrite(env,monkeypatch):

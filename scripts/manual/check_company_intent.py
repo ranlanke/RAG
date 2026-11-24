@@ -35,7 +35,7 @@ def main():
     if not all(os.getenv('COMPANY_KNOWLEDGE_' + key) for key in ('MODEL', 'BASE_URL', 'API_KEY')):
         parser.error('Load COMPANY_KNOWLEDGE_MODEL/BASE_URL/API_KEY before running.')
     os.environ.update(PYTHON_DOTENV_DISABLED='1', DATABASE_URL='sqlite://',
-                      JWT_SECRET_KEY='synthetic-intent-evaluation-only', LANGSMITH_TRACING='false')
+                      JWT_SECRET_KEY='example-local-intent-signing-key', LANGSMITH_TRACING='false')
     corpus = ROOT / 'test/fixtures/knowledge_intent_cases.json'
     source_hashes = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in (
         'backend/company_intent.py', 'backend/company_memory.py', 'backend/company_knowledge.py')}

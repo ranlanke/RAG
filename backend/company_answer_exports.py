@@ -20,7 +20,7 @@ import company_knowledge as kb
 router = APIRouter()
 CITE = re.compile(r'\[id_([^\]]+)\]')
 SEPARATOR = re.compile(r'^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$')
-MISSING = {'', '-', '—', '未知', '未披露', '未找到依据', '暂无', '不适用', 'N/A'}
+MISSING = {'', '-', '—', '未知', '未披露', '未提供', '未提供数据', '未找到依据', '暂无', '不适用', 'N/A'}
 NOTE = '根据本轮回答整理，未经逐份全文核对；缺失项不补猜，数值与口径请核对所附原文。'
 
 

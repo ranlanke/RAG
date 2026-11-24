@@ -138,6 +138,35 @@ def test_formats_columns_and_unknown_message_are_validated(env):
     assert download(env,sid,mid,'png',value_column=29).status_code==422
 
 
+@pytest.mark.parametrize('missing', ['未提供', '未提供数据', '**未提供** [id_1]'])
+def test_percentage_chart_skips_explicit_missing_values_without_inventing_remainder(env, missing, monkeypatch):
+    from PIL import Image, ImageDraw
+    drawn = []
+    original = ImageDraw.ImageDraw.text
+    def record(draw, xy, text, *args, **kwargs):
+        drawn.append(str(text))
+        return original(draw, xy, text, *args, **kwargs)
+    monkeypatch.setattr(ImageDraw.ImageDraw, 'text', record)
+    answer = '| 股东名称 | 持股比例 | 来源 |\n|---|---|---|\n|示例投资公司|20%|[id_1]|\n|其他股东|'+missing+'|[id_1]|'
+    refs = [{**REFS[0], 'text': '示例投资公司持股20%，其他股东持股比例未提供。'}]
+    sid, mid = saved(env, answer, refs)
+    response = download(env, sid, mid, 'png', value_column=1)
+    assert response.status_code == 200, response.text if response.status_code != 200 else ''
+    assert Image.open(io.BytesIO(response.content)).format == 'PNG'
+    assert '20%' in drawn and '80%' not in drawn and '0%' not in drawn
+    assert any('原表2条，绘制1条' in text for text in drawn)
+    assert '其他股东' not in drawn
+    assert download(env, sid, mid, 'xlsx').status_code == 200
+    assert download(env, sid, mid, 'docx').status_code == 200
+
+
+@pytest.mark.parametrize('value', ['未提供', '约20%', '20%-30%', '未提供（约80%）'])
+def test_chart_still_rejects_all_missing_or_uncertain_values(env, value):
+    answer = '| 股东 | 持股比例 | 来源 |\n|---|---|---|\n|甲|'+value+'|[id_1]|'
+    sid, mid = saved(env, answer)
+    assert download(env, sid, mid, 'png', value_column=1).status_code == 422
+
+
 def test_legacy_answer_without_bound_source_version_cannot_be_exported(env):
     sid,mid=saved(env,refs=[{**REFS[0],'local_id':''}])
     assert download(env,sid,mid,'docx').status_code==409

@@ -17,6 +17,27 @@ def task(subjects=('乙公司',), **extra):
             'structured': True, 'topic': '收入', 'constraints': ['限2025年', '不要推算'], **extra}
 
 
+def test_file_scoped_word_followup_keeps_user_source_and_does_not_adopt_assistant_entity(monkeypatch):
+    filename = 'Report_project_ADTEK_guanfu_20260303.docx'
+    first = '请根据所选资料《'+filename+'》，整理公司股东及持股比例。缺失信息写未提供，不要推算。'
+    question = '请根据刚才的分析重新整理股东比例及来源，供 Word 简报使用。'
+    resolved = first + question
+    calls = []
+    async def complete(cfg, instruction, data, **kwargs):
+        calls.append(data)
+        assert 'subjects可以为空数组' in instruction
+        return json.dumps({'query': resolved, 'subjects': [filename], 'topic': '持股比例',
+                           'format': 'auto', 'constraints': ['不要推算']})
+    monkeypatch.setattr(memory, 'complete', complete)
+    context = {'summary': '', 'recent': [{'role': 'user', 'content': first},
+        {'role': 'assistant', 'content': '某公司的全称只能出现在历史回答里，不能作为用户原文。'}], 'task': fresh(first)}
+    cfg = {'explicit_document_scope': True}
+    assert asyncio.run(memory.retrieval_question(cfg, question, context)) == resolved
+    assert cfg['_task_update']['subjects'] == [filename]
+    assert cfg['_task_update']['constraints'] == ['不要推算']
+    assert len(calls) == 1
+
+
 @pytest.mark.parametrize('question', ['整理成表格', '请把回答整理成表格', '改成列表', '请将结果转成清单'])
 def test_formatting_keeps_canonical_query_without_accumulation(question):
     state = task()
@@ -24,6 +45,30 @@ def test_formatting_keeps_canonical_query_without_accumulation(question):
         handled, query, state = local_followup(question, state)
         assert handled and query == '乙公司的收入，限2025年，不要推算'
     assert state['format'] in ('表格', '列表', '清单')
+
+
+@pytest.mark.parametrize('question,fmt', [
+    ('请将刚才的分析、表格、图表和来源说明整理成一份可下载的 Word 简报。', 'docx'),
+    ('请把回答导出为 Excel 表格', 'xlsx'), ('请将上面的表格生成PNG图片', 'png'),
+])
+def test_file_export_followup_preserves_task_and_constraints(question, fmt):
+    state=task()
+    handled,query,updated=local_followup(question,state)
+    assert handled and query==state['request'] and updated['constraints']==state['constraints']
+    assert updated['export_format']==fmt
+    assert not local_followup(question,{**state,'needs_clarification':True})[0]
+
+
+def test_word_export_request_cannot_revive_a_failed_switch():
+    handled,query,updated=local_followup('请把回答导出为Word文档',task(rewrite_failed=True))
+    assert handled and query is None and updated['unresolved_question']
+    assert not local_followup('请将甲公司的预算整理成Word简报',task())[0]
+
+
+@pytest.mark.parametrize('question', ['客户数呢？', '整理成表格'])
+def test_export_instruction_does_not_leak_into_next_business_or_format_request(question):
+    handled,query,updated=local_followup(question,task(export_format='docx'))
+    assert handled and query and updated.get('export_format') is None
 
 
 @pytest.mark.parametrize('question', ['客户数呢？', '怎么收费？', '它的目标用户是谁？', '该公司的收入是多少？'])

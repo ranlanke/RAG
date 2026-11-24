@@ -13,6 +13,9 @@ SYSTEM = re.compile(r'(?:请问|请问一下|我想知道|告诉我|请告诉我
     r'(?:上传(?:文件|资料|材料|文档|视频|图片|音频)|下载(?:文件|报告|原件)|修改密码|重置密码|'
     r'申请权限|新建(?:会话|对话)|删除(?:会话|对话)|使用(?:知识库|本系统|这个系统|AI助手|ai助手))'
     r'(?:呢|啊|呀|的)?')
+COMPOSE = re.compile(r'^(?:(?:换个话题|另一个问题|顺便)[，,:：\s]*)?(?:请|麻烦)?(?:帮我|给我)?'
+    r'(?:起草|撰写|拟|写|草拟)(?:一(?:份|条|封|则|篇)|个)?(?:通知|邮件|邀请函|贺词|公告|文案|短信)(?:[：:，,。！？?\s]|$)')
+SOURCE_REQUEST = re.compile(r'(?:根据|依据|参考|结合|引用|基于|按照|从)[^。！？?]{0,32}(?:报告|资料|原文|文件|文档|知识库|合同|表格)|(?:上一轮|刚才|上面|报告|资料|原文)(?:的|里|中)')
 
 INSTRUCTION = ('\n同时判断意图，只能选smalltalk（纯闲聊）、assistant（本系统操作咨询，转去AI助手）、'
     'knowledge（资料问答）、transform（已有内容的格式加工）、clarify（对象不明）。'
@@ -29,6 +32,8 @@ def compact(question):
 
 def local_route(question):
     text = compact(question)
+    if COMPOSE.match(question.strip()) and not SOURCE_REQUEST.search(question):
+        return {'intent': 'compose', 'query': None}
     if SOCIAL.fullmatch(text):
         return {'intent': 'smalltalk', 'query': None}
     if not knowledge_signal(question) and re.search(
@@ -67,6 +72,8 @@ def validate(payload, question, task):
 
 
 def reply(route, question):
+    if route['intent'] == 'compose':
+        return '这次是写作请求，可以到“AI 助手”继续起草。需要根据知识库资料写作时，请在这里说明要参考哪份资料。'
     if route['intent'] == 'assistant':
         return '系统操作问题请到“AI 助手”咨询；这里可以帮你查找、总结和比较知识库资料。'
     if re.search(r'谢谢|感谢|多谢|辛苦|thanks|thank\s*you', question, re.I):

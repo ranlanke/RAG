@@ -23,9 +23,9 @@ def build_app(data_dir):
     marker.touch()
     repo = Path(__file__).resolve().parents[2]
     os.environ.update(PYTHON_DOTENV_DISABLED='1', DATABASE_URL='sqlite:///' + (root/'audit.sqlite').as_posix(),
-        JWT_SECRET_KEY='disposable-audit-only', COMPANY_KNOWLEDGE_OBJECT_STORE='local',
+        JWT_SECRET_KEY='example-local-audit-signing-key', COMPANY_KNOWLEDGE_OBJECT_STORE='local',
         COMPANY_KNOWLEDGE_LOCAL_STORE=str(root/'originals'), LANGSMITH_TRACING='false',
-        BAILIAN_KNOWLEDGE_API_KEY='fake-audit-key', BAILIAN_KNOWLEDGE_INDEX_ID='audit-index',
+        BAILIAN_KNOWLEDGE_API_KEY='example-fake-audit-provider-key', BAILIAN_KNOWLEDGE_INDEX_ID='audit-index',
         BAILIAN_KNOWLEDGE_AGENT_ID='audit-agent', BAILIAN_KNOWLEDGE_BASE_URL='https://audit.cn-beijing.maas.aliyuncs.com')
     # A missing provider stub must fail locally rather than call any real service.
     old_connect = socket.socket.connect

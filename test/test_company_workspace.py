@@ -568,6 +568,7 @@ def test_preview_rejects_unexpected_file_chunks(setup, monkeypatch):
 
 def test_pdf_original_pages_render_with_bounds_and_access_control(setup):
     import io
+    from PIL import features
     from pypdf import PdfWriter
     writer = PdfWriter()
     writer.add_blank_page(width=200, height=300)
@@ -575,9 +576,16 @@ def test_pdf_original_pages_render_with_bounds_and_access_control(setup):
     content = io.BytesIO()
     writer.write(content)
     doc_id = upload(setup, payload=content.getvalue(), name='pages.pdf', visibility='restricted').json()['id']
-    response = setup.client.get(f'/company-knowledge/documents/{doc_id}/page?page=2')
+    page_url = f'/company-knowledge/documents/{doc_id}/page?page=2'
+    response = setup.client.get(page_url)
     assert response.status_code == 200 and response.content.startswith(b'\x89PNG')
     assert response.headers['x-document-pages'] == '2'
+    assert response.headers['vary'] == 'Accept'
+    webp = setup.client.get(page_url, headers={'Accept': 'image/webp'})
+    assert webp.status_code == 200
+    assert webp.headers['content-type'] == ('image/webp' if features.check('webp') else 'image/png')
+    declined = setup.client.get(page_url, headers={'Accept': 'image/webp;q=0'})
+    assert declined.status_code == 200 and declined.headers['content-type'] == 'image/png'
     assert setup.client.get(f'/company-knowledge/documents/{doc_id}/page?page=3').status_code == 422
     setup.user.id, setup.user.username = 2, 'bob'
     assert setup.client.get(f'/company-knowledge/documents/{doc_id}/page').status_code == 404
