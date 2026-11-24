@@ -69,6 +69,9 @@ def test_real_app_registers_version_before_static_without_business_calls(monkeyp
     monkeypatch.setitem(sys.modules, 'research_api', SimpleNamespace(
         router=APIRouter(), recover_stale_research_projects=no_business, _is_project_running=no_business))
     monkeypatch.setitem(sys.modules, 'account_lifecycle', SimpleNamespace(invitation_cleanup_loop=no_business))
+    monkeypatch.setenv('H5_WORKBENCH_ENABLED', '0')
+    monkeypatch.setitem(sys.modules, 'company_points', SimpleNamespace(initialize=no_business, worker=no_business))
+    monkeypatch.setitem(sys.modules, 'company_points_api', SimpleNamespace(router=APIRouter()))
     def home_router(is_running):
         assert is_running is no_business
         return APIRouter()
