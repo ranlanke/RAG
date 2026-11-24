@@ -13,9 +13,11 @@
   <link rel="stylesheet" href="vendor/fontawesome-free-6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="company-knowledge.css" />
+  <link rel="stylesheet" href="h5-workbench.0f3497fb732d.css" />
   <link rel="stylesheet" href="navigation.7e3a97139c28.css" />
   <link rel="stylesheet" href="accounts.css" />
   <link rel="stylesheet" href="personal-home.css" />
+  <link rel="stylesheet" href="knowledge-points.963d46f59fc2.css" />
   <link rel="stylesheet" href="report-versions.css" />
   <link rel="stylesheet" href="assistant.94a69af9244b.css" />
   <link rel="stylesheet" href="workbench-theme.8ecce8fe6b2b.css" />
@@ -27,7 +29,7 @@
   <link rel="stylesheet" href="knowledge-typography.cfec97d3ca93.css" />
   <link rel="stylesheet" href="workflow-ux.1e3199a055e3.css" />
   <link rel="stylesheet" href="knowledge-usability.1d9a8b1ee4ed.css" />
-<link rel="stylesheet" href="knowledge-workspace.16207781289d.css" />
+<link rel="stylesheet" href="knowledge-workspace.2785a7393d21.css" />
   <link rel="stylesheet" href="project-workspace.f45947814ebe.css" />
 </head>
 <body>
@@ -108,6 +110,7 @@
           <el-menu-item index="knowledge-policies" :disabled="!!$refs.knowledgeWorkspace?.busy" @keydown.enter.prevent.stop="navigateFromSidebar('knowledge-policies')" @keydown.space.prevent.stop="navigateFromSidebar('knowledge-policies')"><i class="fa-solid fa-file-lines" aria-hidden="true"></i><span>制度文件</span></el-menu-item>
           <el-menu-item index="knowledge-experts" :disabled="!!$refs.knowledgeWorkspace?.busy" @keydown.enter.prevent.stop="navigateFromSidebar('knowledge-experts')" @keydown.space.prevent.stop="navigateFromSidebar('knowledge-experts')"><i class="fa-solid fa-user-tie" aria-hidden="true"></i><span>专家部资料</span></el-menu-item>
         </el-sub-menu>
+        <el-menu-item v-if="h5Enabled" index="knowledge-h5"><i class="fa-solid fa-file-code" aria-hidden="true"></i><span>H5 制作</span></el-menu-item>
         <el-menu-item v-if="currentUser?.role === 'admin'" index="accounts"><i class="fa-solid fa-users-gear" aria-hidden="true"></i><span>账号管理</span></el-menu-item>
       </el-menu>
       </div>
@@ -117,6 +120,7 @@
         </button>
         <div v-if="sidebarAccountOpen" id="sidebar-account-options" class="sidebar-account-options" role="group" aria-label="账号操作">
           <div class="sidebar-account-summary"><strong>{{ currentUser?.username }}</strong><small>{{ currentUser?.role === 'admin' ? '管理员' : '普通用户' }}</small></div>
+          <button type="button" @click="sidebarAccountOpen = false; switchView('points')"><i class="fa-solid fa-medal" aria-hidden="true"></i>我的积分</button>
           <button type="button" @click="sidebarAccountOpen = false; mobileNavOpen = false; openPasswordChange()"><i class="fa-solid fa-key" aria-hidden="true"></i>修改密码</button>
           <button type="button" class="sidebar-logout" @click="sidebarAccountOpen = false; handleLogout()"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>退出登录</button>
         </div>
@@ -147,8 +151,10 @@
         <div v-if="isTaskWorkspace" class="project-resource-toolbar">
           <span v-if="actionPending('projects')" role="status">正在更新项目列表…</span><span v-else-if="workspaceMetaLoading" role="status">正在核对项目分类…</span><span v-else>{{stageProjects.length}} 个项目 · 已生成的报告仍需人工复核</span>
         </div>
-        <personal-home v-if="activeView === 'home'" :request="authFetch" :read="readJSON" :current-user="currentUser" :download="downloadArtifact" @navigate="switchView" @filter-tasks="openHomeTaskFilter" @open-project="openHomeProject" @view-versions="report => openReportVersions({id:report.project_id, title:report.project_title}, report.artifact_type)"></personal-home>
-        <company-knowledge :department-entry="knowledgeDepartmentEntry" @department-change="knowledgeDepartment=$event" ref="knowledgeWorkspace" v-if="activeView === 'company-knowledge'" :projects="projects" :feedback="runAction" :operation-state="pendingActions"></company-knowledge>
+        <personal-home v-if="activeView === 'home'" :request="authFetch" :read="readJSON" :current-user="currentUser" :download="downloadArtifact" @navigate="switchView" @knowledge-action="openPointsAction" @filter-tasks="openHomeTaskFilter" @open-project="openHomeProject" @view-versions="report => openReportVersions({id:report.project_id, title:report.project_title}, report.artifact_type)"></personal-home>
+        <points-center v-if="activeView === 'points'" :key="currentUser?.username" :request="authFetch" :current-user="currentUser" @action="openPointsAction"></points-center>
+        <h5-workbench v-if="activeView === 'knowledge-h5' && h5Enabled" :key="token" :request="authFetch" :entry="h5Entry" @location="openH5Location"></h5-workbench>
+        <company-knowledge @open-points="switchView('points')" :department-entry="knowledgeDepartmentEntry" @department-change="knowledgeDepartment=$event" @generate-h5="openH5" @open-h5="openSavedH5" ref="knowledgeWorkspace" v-if="activeView === 'company-knowledge'" :projects="projects" :feedback="runAction" :operation-state="pendingActions"></company-knowledge>
 
         <account-management v-if="activeView === 'accounts' && currentUser?.role === 'admin'" :request="authFetch" @session-invalidated="handleLogout"></account-management>
         <el-dialog v-model="taskCreateOpen" title="新建项目" width="min(860px, 94vw)" :close-on-click-modal="false" class="task-create-dialog">
@@ -560,16 +566,18 @@
 <script defer src="vendor/marked-18.1.2/marked.umd.js"></script>
 <script defer src="vendor/purify-3.4.17.min.js"></script>
 <script defer src="safe-markdown.js"></script>
+<script defer src="h5-workbench.418e82bd81bc.js"></script>
+<script defer src="knowledge-points.f0a152f9343b.js"></script>
 <script defer src="knowledge-glass-optics.8cba1cf6e905.js"></script>
-<script defer src="knowledge-document-viewer.17e50ff140df.js"></script>
+<script defer src="knowledge-document-viewer.484b01cd5d73.js"></script>
 <link rel="stylesheet" href="knowledge-note-editor.70b7481352b4.css">
 <script defer src="knowledge-note-editor.97e3f47133aa.js"></script>
-<script defer src="company-knowledge.088d14108651.js"></script>
-<script defer src="account-management.42b1dd6628ec.js"></script>
-<script defer src="personal-home.1977e79323c9.js"></script>
+<script defer src="company-knowledge.e4f22c234e21.js"></script>
+<script defer src="account-management.ae5818114371.js"></script>
+<script defer src="personal-home.22fbfc96f058.js"></script>
 <script defer src="report-versions.js"></script>
 <script defer src="project-workspace.5862f06db460.js"></script>
-<script defer src="script.cc29ff3a8aab.js"></script>
+<script defer src="script.365601628541.js"></script>
 </body>
 </html>
 

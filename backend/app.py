@@ -51,9 +51,17 @@ def create_app() -> FastAPI:
         # forever even though no worker exists to finish them.
         research_api_module.recover_stale_research_projects()
         app.state.invitation_cleanup_task = asyncio.create_task(invitation_cleanup_loop())
+        if os.getenv('H5_WORKBENCH_ENABLED', '').lower() in {'1', 'true'}:
+            from company_h5_worker import worker_loop
+            app.state.h5_adapter_task = asyncio.create_task(worker_loop())
 
     @app.on_event("shutdown")
     async def _stop_invitation_cleanup():
+        adapter = getattr(app.state, 'h5_adapter_task', None)
+        if adapter:
+            adapter.cancel()
+            with suppress(asyncio.CancelledError):
+                await adapter
         task = getattr(app.state, "invitation_cleanup_task", None)
         if task:
             task.cancel()
@@ -83,6 +91,8 @@ def create_app() -> FastAPI:
         response.headers['Referrer-Policy'] = 'no-referrer'
         response.headers['Content-Security-Policy'] = "frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
         path = request.url.path or ""
+        if path.startswith('/company-knowledge/h5/'):
+            response.headers['Cache-Control'] = 'no-store'
         if path == "/" or path.endswith((".html", ".js", ".css")):
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             response.headers["Pragma"] = "no-cache"
@@ -98,6 +108,9 @@ def create_app() -> FastAPI:
     app.include_router(research_api_module.router)
     app.include_router(create_home_router(research_api_module._is_project_running))
     app.include_router(company_knowledge_module.router)
+    if os.getenv('H5_WORKBENCH_ENABLED', '').lower() in {'1', 'true'}:
+        from company_h5 import router as h5_router
+        app.include_router(h5_router)
     app.include_router(create_version_router({
         'cleaning': research_workflow_module.INDUSTRY_CLEANING_VERSION,
         'risk': industry_research_module.INDUSTRY_RISK_VERSION,

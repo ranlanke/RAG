@@ -1,0 +1,28 @@
+name: guanfu-h5-workbench
+services:
+  h5:
+    image: pageo-h5:20261118-final
+    build:
+      context: ./pageo
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    init: true
+    ports:
+      - "127.0.0.1:18806:8000"
+    env_file: .env.pageo.private
+    environment:
+      LANDPPT_DATA_DIR: /app/data
+      LANDPPT_REQUIRE_PERSISTENT_DATA: "true"
+      ENABLE_USER_REGISTRATION: "false"
+      SESSION_COOKIE_SECURE: "true"
+      WORKERS: "1"
+    cpus: "1.0"
+    mem_limit: 3g
+    volumes:
+      - h5-data:/app/data
+      - h5-backups:/backups
+volumes:
+  h5-data:
+    name: guanfu_h5_workbench_data
+  h5-backups:
+    name: guanfu_h5_workbench_backups
