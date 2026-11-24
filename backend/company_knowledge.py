@@ -437,6 +437,7 @@ def knowledge_status(user: User = Depends(get_current_user)):
     except KnowledgeError:
         configured = False
     return {'configured': configured, 'access_allowed': has_access(user),
+            'h5_enabled': os.getenv('H5_WORKBENCH_ENABLED', '').lower() in {'1', 'true'},
             'name': '公司知识库', 'provider': '阿里云百炼', 'is_admin': user.role == 'admin',
             'username': user.username, 'account_id': getattr(user, 'id', None)}
 

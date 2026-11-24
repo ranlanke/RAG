@@ -240,11 +240,15 @@ def select_scope(cfg, user, requested, scope):
         if requested:
             if any(doc_id not in visible for doc_id in requested):
                 raise HTTPException(403, '所选资料不存在或没有访问权限，请刷新列表。')
+            if any(doc_id not in latest for doc_id in requested):
+                raise HTTPException(409, '所选资料包含历史版本，请重新选择最新版；旧版仍可在历史记录中查看。')
             selected = [visible[doc_id] for doc_id in dict.fromkeys(requested)]
+            if any(doc.format == 'H5' for doc in selected):
+                raise HTTPException(409, 'H5 是展示成果，不参与问答；请改选来源原件。')
             if any(doc.state != 'ready' for doc in selected):
                 raise HTTPException(409, '所选资料尚未完成索引，请等待处理完成。')
         else:
-            selected = [doc for doc in visible.values() if doc.id in latest and doc.state == 'ready' and doc.is_current]
+            selected = [doc for doc in visible.values() if doc.id in latest and doc.state == 'ready' and doc.is_current and doc.format != 'H5']
         # Empty never means an unfiltered search.
         return {doc.cloud_id: {'id': doc.id, 'title': doc.title, 'review': doc.review,
                  'version': doc.version, 'project': doc.project, 'industry': doc.industry,
@@ -329,7 +333,7 @@ def resolve_selection(body: KnowledgeSelection, user: User = Depends(kb.require_
                   (body.department is None or doc.department == body.department) and
                   (not explicit or doc.id in body.document_ids or
                    doc.knowledge_project_id in body.project_ids or doc.folder_id in subtree)]
-        ready = [doc.id for doc in chosen if doc.state == 'ready' and doc.cloud_id]
+        ready = [doc.id for doc in chosen if doc.state == 'ready' and doc.cloud_id and doc.format != 'H5']
         if not ready:
             raise HTTPException(409, '所选范围没有已完成索引的可访问资料，请等待处理完成或重新选择。')
         if len(ready) > 1000:
@@ -507,6 +511,10 @@ async def upload(request: Request, file: UploadFile = File(...), project: str = 
                 parser='DOCMIND' if extension in ('pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png') else 'AUTO_SELECT')
             try:
                 db.add(doc)
+                if os.getenv('H5_WORKBENCH_ENABLED', '').lower() in {'1', 'true'}:
+                    from company_h5_models import observe_version
+                    db.flush()
+                    observe_version(db, doc, previous)
                 notice = ('检测到重复文件，已另存为“' + title + '”，原文件未改变。' if disposition == 'copy' else
                           '已保存为新版本，旧版本仍保留。' if disposition == 'version' else '')
                 receipt = dict(upload_disposition=disposition, upload_notice=notice)
@@ -868,6 +876,8 @@ def my_projects(user: User = Depends(kb.require_knowledge_user), scope: str = 'm
 async def retry(doc_id: str, user: User = Depends(kb.require_knowledge_user)):
     with SessionLocal() as db:
         doc = find_doc(db, doc_id, user, manage=True)
+        if doc.format == 'H5':
+            raise HTTPException(409, 'H5 是展示成果，无需建立问答索引。')
         before = snapshot(doc)
         if doc.state != 'failed' or not doc.object_key:
             raise HTTPException(409, '仅本系统上传且处理失败的文件可以重试。')
@@ -941,6 +951,19 @@ async def original(doc_id: str, request: Request, download: bool = False,
         if not doc.object_key:
             raise HTTPException(404, '这份历史资料尚无受控原件，请联系资料管理者补传后再预览或下载。', headers={'X-Preview-Error': 'original_missing'})
         object_key, fmt, title = doc.object_key, doc.format, version_title(doc)
+    if fmt == 'H5':
+        try:
+            payload = await asyncio.to_thread(document_store().get_bytes, object_key)
+        except FileNotFoundError:
+            raise HTTPException(404, '归档原件已缺失，请联系资料管理者补传。') from None
+        with SessionLocal() as db:
+            doc = find_doc(db, doc_id, user)
+            record(db, user, 'document.download', doc, before=snapshot(doc), event_id=trace_id,
+                details={'trace_id': trace_id, 'sha256': hashlib.sha256(payload).hexdigest(), 'artifact_type': 'h5'})
+            db.commit()
+        return Response(payload, media_type='application/octet-stream', headers={
+            'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff',
+            'Content-Disposition': "attachment; filename=report.html; filename*=UTF-8''"+quote(title, safe='')})
     update = export_progress.begin(user, doc_id, request_id) if request_id else None
     try:
         data = await asyncio.to_thread(document_store().get_bytes, object_key)
@@ -1031,6 +1054,8 @@ async def preview(doc_id: str, response: Response, page: int = Query(1, ge=1), u
         current = find_doc(db, doc_id, user)
         if current.cloud_id != cloud_id or current.state != 'ready':
             raise HTTPException(409, '资料版本已变化，请重新打开后查看片段。')
+        from company_points import note_preview
+        note_preview(db, user, current, refs)
     total = max(int(result.get('total') or 0), (page - 1) * 20 + len(refs))
     return {'references': refs, 'total': total, 'page': page,
             'has_more': page * 20 < total or (not result.get('total') and len(result.get('nodes', [])) == 20),

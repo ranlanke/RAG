@@ -325,6 +325,10 @@ def effective_acl(doc):
 def can_read(doc, user):
     if getattr(doc, 'deleted_at', None):
         return False
+    if getattr(doc, 'format', '') == 'H5':
+        from company_h5 import artifact_allowed
+        if not artifact_allowed(doc, user):
+            return False
     # Classification is a ceiling, including for legacy owners and reader grants.
     if not classification_allowed(doc, user):
         return False
@@ -341,7 +345,7 @@ def can_manage(doc, user):
     return not getattr(doc, 'deleted_at', None) and permitted and (user.role == 'admin' or is_owner(doc, user))
 
 
-STATE_LABELS = {'queued': '等待处理', 'uploading': '上传到知识库', 'parsing': '解析 / OCR 中',
+STATE_LABELS = {'display': '无需索引', 'queued': '等待处理', 'uploading': '上传到知识库', 'parsing': '解析 / OCR 中',
                 'indexing': '建立索引中', 'ready': '可检索', 'failed': '处理失败', 'deleting': '正在移除索引', 'deleted': '已删除', 'archived': '已归档'}
 
 
@@ -357,6 +361,7 @@ def serialize(doc, user, request_status=''):
         values.update(effective_acl(doc))
     return values | {
         'display_title': version_title(doc),
+        'artifact_type': 'h5' if doc.format == 'H5' else '',
         'can_history': readable and bool(doc.sha256) and not doc.note_id and not doc.research_project_id,
         'copy_origin': dict(doc.copy_origin or {}) if readable else {},
         'note_id': doc.note_id if readable else '',
@@ -364,7 +369,7 @@ def serialize(doc, user, request_status=''):
         'readers': effective_acl(doc)['readers'] if can_manage(doc, user) else [],
         'cloud_id': doc.cloud_id if readable else None,
         'status': ('FINISH' if doc.state == 'ready' else doc.state.upper()) if readable else 'LOCKED',
-        'label': STATE_LABELS.get(doc.state, doc.state) if readable else '需要授权',
+        'label': ('无需索引' if doc.format == 'H5' else STATE_LABELS.get(doc.state, doc.state)) if readable else '需要授权',
         'has_original': bool(doc.object_key) if readable else False,
         'can_read': readable, 'can_request': locked and request_status != 'pending',
         'request_status': request_status, 'is_owner': is_owner(doc, user),

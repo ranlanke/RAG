@@ -250,9 +250,9 @@ async def restore(item_id: str, user=Depends(kb.require_knowledge_user)):
                         notices.append('同名文件已有其他版本，已作为下一版本恢复，原有版本保留。')
                 obj.stale_cloud_id = obj.cloud_id or obj.stale_cloud_id or ''
                 obj.cloud_id, obj.job_id, obj.lease_id = None, '', ''
-                obj.state = 'archived' if not obj.is_current else 'queued'
-                obj.status_message = '已从回收站恢复，等待重新索引' if obj.is_current else '已恢复历史版本'
-                if obj.is_current:
+                obj.state = 'display' if obj.format == 'H5' else ('archived' if not obj.is_current else 'queued')
+                obj.status_message = 'H5 展示成果，无需问答索引' if obj.format == 'H5' else ('已从回收站恢复，等待重新索引' if obj.is_current else '已恢复历史版本')
+                if obj.is_current and obj.format != 'H5':
                     queued.append(obj.id)
             row.status, row.finished_at = 'restored', datetime.utcnow()
             mark_modified(obj, user)

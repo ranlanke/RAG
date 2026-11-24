@@ -72,6 +72,8 @@ def checkpoint(doc_id, token, **values):
         if values.get('state') == 'ready':
             from company_notes import publication_ready
             publication_ready(db, doc_id)
+            from company_points import capture_ready
+            capture_ready(db, doc_id)
         db.commit()
         observe_checkpoint(values.get('state'))
 
@@ -86,6 +88,7 @@ async def _process_document(doc_id):
     token = uuid.uuid4().hex
     with SessionLocal() as db:
         claimed = db.execute(update(CompanyDocument).where(CompanyDocument.id == doc_id,
+            CompanyDocument.format != 'H5',
             CompanyDocument.state.in_(ACTIVE), or_(CompanyDocument.lease_until.is_(None),
             CompanyDocument.lease_until < datetime.utcnow())).values(worker_id=token,
             lease_until=datetime.utcnow() + timedelta(minutes=3)))

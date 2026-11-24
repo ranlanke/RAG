@@ -31,6 +31,8 @@ from personal_home import create_home_router
 from http_delivery import ResearchReadCompression, RequestBodyLimit
 from company_observability import KnowledgeHTTPMiddleware, instrument_engine
 from company_capacity import KnowledgeCapacityMiddleware
+import company_points
+from company_points_api import router as points_router
 
 BASE_DIR = BACKEND_DIR.parent
 FRONTEND_DIR = BASE_DIR / "frontend"
@@ -51,12 +53,23 @@ def create_app() -> FastAPI:
         # forever even though no worker exists to finish them.
         research_api_module.recover_stale_research_projects()
         app.state.invitation_cleanup_task = asyncio.create_task(invitation_cleanup_loop())
+        try:
+            from database import engine
+            await asyncio.to_thread(company_points.initialize, engine)
+            app.state.points_task = asyncio.create_task(company_points.worker())
+        except Exception:
+            company_points.log.exception('knowledge_points_startup_failed')
         if os.getenv('H5_WORKBENCH_ENABLED', '').lower() in {'1', 'true'}:
             from company_h5_worker import worker_loop
             app.state.h5_adapter_task = asyncio.create_task(worker_loop())
 
     @app.on_event("shutdown")
     async def _stop_invitation_cleanup():
+        points_task = getattr(app.state, 'points_task', None)
+        if points_task:
+            points_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await points_task
         adapter = getattr(app.state, 'h5_adapter_task', None)
         if adapter:
             adapter.cancel()
@@ -108,6 +121,7 @@ def create_app() -> FastAPI:
     app.include_router(research_api_module.router)
     app.include_router(create_home_router(research_api_module._is_project_running))
     app.include_router(company_knowledge_module.router)
+    app.include_router(points_router)
     if os.getenv('H5_WORKBENCH_ENABLED', '').lower() in {'1', 'true'}:
         from company_h5 import router as h5_router
         app.include_router(h5_router)
