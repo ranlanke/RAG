@@ -1,0 +1,24 @@
+{
+  "semantic_signature": "49e67286d040abff62c68be1b5d16c76617afbaf46b9479a33b1319b8bede655",
+  "legacy_module_hashes": [
+    "c839f9746726bdaa455ff08b744794fa60f31e3553d8b68da02536cf2d1e0e45",
+    "412db3fc3809924f5cd942952ca577f9eedb3341214181b293375728db832600",
+    "bcee83e96ec316d25cc6d6a72809b88b06e7eb746461043c6ee0cdf02c334c13",
+    "1532649bfe0284894beb562aa2c93a311711c555afd4dc7fb9a5bc607336ab61",
+    "a9162be4ea5786bf695f2ab2aadb9952b151f8faafeed2ecb9f3883e37caebc8",
+    "1ad9828757a5e0b84ff8305052e91ed344644282d056ddf6babd89dc850ded15",
+    "127b6588923bc5e6532b13df49dd1c1ad2e58c18f1d0c699c741834754931afb"
+  ],
+  "purpose": "Reviewed compatibility: caller-thread persistence, opt-in lossless transport, draft-first scheduling and source-bound writing/review partitions. Original validate_audit remains unchanged; old full audits retain every semantic gate. Exact native packets, prose and cached audits are revalidated. Partial writing partitions never count as a complete draft or an accepted audit. Reviews must cover all original propositions and preserve negative verdicts. Reviewed 2026-11-11: output-locator-only repairs preserve all semantic verdicts and re-run the unchanged validators; failed responses retain specific diagnostic codes; same-proposal deferred receipts merge completed slices. No old acceptance gate is waived. Canonical JSON slice hashes and guarded parent-proof/proposal-identical old-slice rebinding retain full slice validation. Strict mode retains prior validators. Opt-in core-semantic review has a separate file-bound policy and never migrates strict judgments as semantic acceptance.",
+  "previous_semantic_signatures": [
+    "a7cb7e708ea83efb59c33c96139a8608a46d2057e98c7989ff272c1cde644850",
+    "5cb1dbefb04879d4f615709bd6abd1db7c0074382188fd8e08c58a333f45e002",
+    "2449f87a493fbe728006c4d5ab9c183284fa202ccf6abc6dfdf730ab33ccb186",
+    "8f109c0ef75587e286cedd962fac2097f0ee5f3d748e456580f42481479980e6",
+    "7c1e2f07b2c68645c5297c746d727e5802929e20cf6e69882ed8e40b3a27ed64",
+    "7fa1aef3ad875f0daf955adce8f543eac028913f7869ea7fab9f19e664be66a7",
+    "6a7d34ab6407c5d6f196b014c6eb76b2990a0bf81021f5423e951ed152fcb8b4",
+    "aae78f02569af2e62a58ff56407d9014360aa88cb8ffd5de39a5f8a94ddaa2e9",
+    "b0fbb3e1299831860b51cbe5d2da97d47ba26b8e8965c6ab7493b1c9052fab69"
+  ]
+}

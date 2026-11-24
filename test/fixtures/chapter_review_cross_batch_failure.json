@@ -1,0 +1,30 @@
+{
+  "source_id": "I-951fddfe2b594fb9",
+  "fact": "MSCI ESG（明晟）评级 摩根士丹利资本国际公司 AA\nS&P Global CSA\n（标普全球企业可持续发展评估） S&P Global（标普全球） 58/100",
+  "completed_native_audit": [
+    {
+      "information_id": "I-951fddfe2b594fb9",
+      "paragraph_ids": [
+        "F-47933bcec0b05b15"
+      ],
+      "reason": "正文段落 F-47933bcec0b05b15 中提及“MSCI ESG评级为AA”，与本批原文 I-951fddfe2b594fb9 提供的“MSCI ESG（明晟）评级... AA”一致，核心含义正确保留。",
+      "status": "pass"
+    }
+  ],
+  "failing_issue": [
+    {
+      "issue_id": "ISSUE-001",
+      "kind": "unsupported_claim",
+      "output_meaning": "正文断言了上述多项具体数据和合作评价作为事实陈述。",
+      "paragraph_ids": [
+        "F-47933bcec0b05b15"
+      ],
+      "reason": "正文夹带大量无依据事实，违反“仅使用给定原文和结构化证据，不新增事实”的核心约束，必须删除这些无来源支持的内容。",
+      "source_ids": [],
+      "source_meaning": "当前提供的全部来源均未包含2026年半年度月活数据、ESG评级、用户满意度、OPPO/小米合作细节及IDC/艾瑞评价等信息。"
+    }
+  ],
+  "diagnosis": "Facts in other audited batches were omitted from the local review context.",
+  "latest_fix": "include other_verified_sources",
+  "paid_revalidation": "NOT_RUN"
+}

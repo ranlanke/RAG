@@ -1,0 +1,67 @@
+{
+  "finding_id": "F-978096cb8fbcff92",
+  "allowed_information_ids": [
+    "I-8f40c63cc384b4f5",
+    "I-95e449f512e69463",
+    "I-96d8c5bbdbb78f25",
+    "I-ed3d655d63d135d2",
+    "I-fe04d2d21992c96a"
+  ],
+  "actual_source_aliases": [
+    {
+      "information_id": "I-8f40c63cc384b4f5",
+      "evidence_ids": [
+        "E-004A71394ACA"
+      ]
+    },
+    {
+      "information_id": "I-95e449f512e69463",
+      "evidence_ids": [
+        "E-004A71394ACA"
+      ]
+    },
+    {
+      "information_id": "I-ed3d655d63d135d2",
+      "evidence_ids": [
+        "E-004A71394ACA"
+      ]
+    },
+    {
+      "information_id": "I-fe04d2d21992c96a",
+      "evidence_ids": [
+        "E-004A71394ACA"
+      ]
+    },
+    {
+      "information_id": "I-96d8c5bbdbb78f25",
+      "evidence_ids": [
+        "E-004A71394ACA"
+      ]
+    }
+  ],
+  "error": "invalid_scoped_claim_check",
+  "original_invalid_checks": [
+    {
+      "claim_id": "C-46cfe47b9486802c",
+      "kind": "relationship",
+      "reason": "原文指出公司与第三方功能组件提供商签署协议并明确分成机制，且声明不存在不正当竞争行为。虽然原文未直接点名“微软”，但作为IPO披露文件中的典型案例，该描述支持了存在长期授权合作、集成组件及合规性的核心主张。",
+      "source_ids": [
+        "E-004A71394ACA"
+      ],
+      "status": "supported"
+    }
+  ],
+  "repair_invalid_checks": [
+    {
+      "claim_id": "C-46cfe47b9486802c",
+      "kind": "relationship",
+      "reason": "原文指出公司与第三方功能组件提供商签署协议并明确分成机制，且声明不存在不正当竞争行为。虽然原文未直接点名“微软”，但作为IPO披露文件中的典型案例，该描述支持了存在长期授权合作、集成组件及合规性的核心主张。",
+      "source_ids": [
+        "E-004A71394ACA"
+      ],
+      "status": "supported"
+    }
+  ],
+  "reviewer_unchanged_after_format_repair": true,
+  "later_msci_batch_reached": false
+}

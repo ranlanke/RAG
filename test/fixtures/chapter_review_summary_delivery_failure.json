@@ -1,0 +1,133 @@
+{
+  "advice": [
+    "建议删除小结最后一句：“现有资料主要基于发行人自述、官方荣誉及平台展示，缺乏来自员工、竞品及合作方的独立主观评价或量化满意度数据。”",
+    "确保正文其他部分（非小结）已充分披露上述资料局限性，以符合scope_description中关于多方交叉访谈评估的要求，若正文未提及，需在正文中补充说明当前证据链的边界。"
+  ],
+  "critical_checks": [
+    {
+      "claim": "现有资料主要基于发行人自述、官方荣誉及平台展示，缺乏来自员工、竞品及合作方的独立主观评价或量化满意度数据。",
+      "evidence_check": "该主张本身是对研究局限性的陈述，而非对目标公司事实的描述。虽然read_only_context中的段落（如F-5d41b4138cf4b3ac, F-978096cb8fbcff92）证实了确实缺乏此类独立访谈数据，但根据审稿规则，chapter_summary不应包含此类“尚待获取”、“缺乏材料”等未确定事项的列举。小结应仅概括已确定的正面事实（如MAU、央企覆盖率、技术鉴定）。",
+      "kind": "absence",
+      "paragraph_id": "C5-SUMMARY",
+      "source_ids": [],
+      "status": "block"
+    },
+    {
+      "claim": "截至2025年12月，WPS全球月度活跃设备数达6.78亿",
+      "evidence_check": "核对来源I-951fddfe2b594fb9和I-a46477a686174fe8，均明确记载“主要产品月度活跃设备数 6.78 亿”及“截至2025年12月...为6.78亿”。事实一致。",
+      "kind": "direct_fact",
+      "paragraph_id": "C5-SUMMARY",
+      "source_ids": [
+        "I-951fddfe2b594fb9",
+        "I-a46477a686174fe8"
+      ],
+      "status": "pass"
+    },
+    {
+      "claim": "已服务国内96家央企中的82家",
+      "evidence_check": "核对来源I-28dc83abbf85b7a2，原文记载“国内 96 家央企中，公司所服务的客户已达 82 家”。事实一致。",
+      "kind": "direct_fact",
+      "paragraph_id": "C5-SUMMARY",
+      "source_ids": [
+        "I-28dc83abbf85b7a2"
+      ],
+      "status": "pass"
+    },
+    {
+      "claim": "经中国电子学会鉴定，WPS Office整体技术水平处于‘国内领先’，多项技术达到‘国际先进’",
+      "evidence_check": "核对来源I-8d8765ba3784892e和I-aa6e8e5860280078，原文均记载“经过中国电子学会技术鉴定，WPS Office办公软件产品整体技术水平在办公软件领域国内领先，多项技术国际先进”。事实一致。",
+      "kind": "direct_fact",
+      "paragraph_id": "C5-SUMMARY",
+      "source_ids": [
+        "I-8d8765ba3784892e",
+        "I-aa6e8e5860280078"
+      ],
+      "status": "pass"
+    }
+  ],
+  "issues": [
+    {
+      "issue_id": "ISSUE-C5-SUMMARY-GAP",
+      "kind": "missing_deliverable",
+      "output_meaning": "小结末尾声称“缺乏来自员工、竞品及合作方的独立主观评价或量化满意度数据”，属于列举资料缺口/未确定事项。",
+      "paragraph_ids": [
+        "C5-SUMMARY"
+      ],
+      "reason": "根据审稿标准，chapter_summary必须只简短归纳已明确事实，不列资料缺口。小结中包含“缺乏...”、“尚需补充核验”等表述时，contains_evidence_gap为true，必须判block并建立missing_deliverable问题，局部删除缺口内容。资料缺口应留在正文中说明，不应出现在小结里。",
+      "source_ids": [],
+      "source_meaning": "无特定来源支持此句作为小结内容；该句是对研究局限性的元描述。"
+    }
+  ],
+  "paragraphs": [
+    {
+      "paragraph_id": "C5-SUMMARY",
+      "reason": "小结中明确列出了资料缺口（“缺乏来自员工、竞品及合作方的独立主观评价或量化满意度数据”），违反了小结交付要求。根据审稿标准，小结不得列出待核事项或资料缺口，此类内容应保留在正文中，小结仅归纳已确定事实。因此判定为missing_deliverable并需局部删除该句。",
+      "source_ids": [
+        "I-8d8765ba3784892e",
+        "I-951fddfe2b594fb9",
+        "I-a46477a686174fe8",
+        "I-b0eb30da0fd35f16",
+        "I-28dc83abbf85b7a2",
+        "I-aa6e8e5860280078"
+      ],
+      "status": "block"
+    }
+  ],
+  "sources": [
+    {
+      "information_id": "I-8d8765ba3784892e",
+      "paragraph_ids": [
+        "C5-SUMMARY"
+      ],
+      "reason": "来源支持了小结中关于中国电子学会技术鉴定结论（国内领先、国际先进）的事实陈述。",
+      "status": "pass"
+    },
+    {
+      "information_id": "I-951fddfe2b594fb9",
+      "paragraph_ids": [
+        "C5-SUMMARY"
+      ],
+      "reason": "来源支持了小结中关于WPS全球月度活跃设备数达6.78亿的数据。",
+      "status": "pass"
+    },
+    {
+      "information_id": "I-a46477a686174fe8",
+      "paragraph_ids": [
+        "C5-SUMMARY"
+      ],
+      "reason": "来源支持了截至2025年12月MAU为6.78亿的时间点和数值。",
+      "status": "pass"
+    },
+    {
+      "information_id": "I-b0eb30da0fd35f16",
+      "paragraph_ids": [
+        "C5-SUMMARY"
+      ],
+      "reason": "来源支持了公司披露的MAU数据及覆盖范围等基础事实。",
+      "status": "pass"
+    },
+    {
+      "information_id": "I-28dc83abbf85b7a2",
+      "paragraph_ids": [
+        "C5-SUMMARY"
+      ],
+      "reason": "来源支持了公司已服务国内96家央企中的82家的具体比例和数量。",
+      "status": "pass"
+    },
+    {
+      "information_id": "I-aa6e8e5860280078",
+      "paragraph_ids": [
+        "C5-SUMMARY"
+      ],
+      "reason": "来源再次确认了中国电子学会的技术鉴定结果，支撑小结中的技术实力描述。",
+      "status": "pass"
+    }
+  ],
+  "summary_delivery_checks": [
+    {
+      "contains_evidence_gap": true,
+      "paragraph_id": "C5-SUMMARY",
+      "reason": "小结最后一句明确指出“缺乏来自员工、竞品及合作方的独立主观评价或量化满意度数据”，这属于列举尚待获取或缺少材料的未确定事项，符合contains_evidence_gap为true的定义。"
+    }
+  ]
+}

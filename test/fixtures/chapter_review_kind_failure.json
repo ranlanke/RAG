@@ -1,0 +1,281 @@
+{
+  "receipt": {
+    "answer": {
+      "checks": [
+        {
+          "claim_id": "C-040679de57e6f1fa",
+          "kind": "direct_fact",
+          "reason": "本批提供的证据片段（年报MAU数据、保荐机构核查意见）未包含“国内领先的办公软件产品和服务提供商”或“全球先进、国内领先的办公软件厂商之一”的具体定位表述。虽然保荐机构意见提及“核心技术在国内领先”，但无法直接支持公司整体市场定位的完整措辞，且该具体定位通常出现在招股书简介或年报概述中，本批未提供对应原文。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-862a18173399f8bc",
+          "kind": "calculation",
+          "reason": "来源文本明确记载：“截至报告期末...WPS 全球月度活跃设备数达 6.78 亿，同比增长 7.29%。其中，WPS Office PC 版月度活跃设备数 3.29 亿...WPS Office 移动版月度活跃设备数 3.49 亿”。经计算，PC端(3.29) + 移动端(3.49) = 6.78亿，与总数一致；各分项数值及增长率均与主张完全匹配。注：来源为2025年年度报告，故“报告期末”即指2025年12月31日。",
+          "source_ids": [
+            "E-5D061851B6D6"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "C-fbf3c37bb360a4bf",
+          "kind": "direct_fact",
+          "reason": "本批资料仅包含2025年年报关于MAU的数据及IPO时期的保荐机构核查意见，未提供2025年10月的DAU数据或相关第三方统计记录，无法核实该特定时间点的日活数据。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-a2c249d794505815",
+          "kind": "direct_fact",
+          "reason": "来源文本支持“覆盖全球 220 多个国家和地区”这一事实。但关于“支持Windows、Linux、MacOS、Android、iOS等主流操作平台平滑应用”的具体描述在本批提供的简短摘录中未出现（尽管这是金山办公的公开常识，但依据严格核对标准，本批证据不足以支持后半部分主张）。鉴于任务要求判断是否支持“整条主张”，此处标记为不支持/未评估。修正：根据指令“supported表示本批证据支持整条主张”，因缺少平台兼容性证据，应判为not_assessed或contradicted? 不，是证据缺失导致无法验证整句。故为not_assessed。",
+          "source_ids": [
+            "E-5D061851B6D6"
+          ],
+          "status": "partially_supported"
+        },
+        {
+          "claim_id": "C-4b810f5ac03d09c6",
+          "kind": "direct_fact",
+          "reason": "本批资料未包含关于《财富》世界500强中国企业服务数量或央企服务数量的具体统计数据。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-b215822d853dcc3d",
+          "kind": "direct_fact",
+          "reason": "本批资料未包含《财富》中文版2026年最受赞赏的中国公司榜单相关信息。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-d7df1d4128899177",
+          "kind": "direct_fact",
+          "reason": "本批资料未包含Google Play“顶尖开发者”称号的相关证明或披露文本。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-8dc14dd0336b285a",
+          "kind": "relationship",
+          "reason": "本批资料中的保荐机构核查意见主要关注技术先进性，未列示具体的可比同行名单（如微软、谷歌等）。虽然招股说明书通常有此列表，但本批提供的片段未包含该信息。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-960f9cb3227ebbe2",
+          "kind": "conclusion",
+          "reason": "来源文本（保荐机构核查意见）明确指出：“公司现有产品技术的先进性与国际主流产品相当，达到国际先进水平”以及“公司核心技术或产品不存在被国际、国内市场上其他技术模仿、替代、淘汰的风险”。这与主张中的“技术先进性与国际主流产品相当...不存在被其他技术模仿、替代或淘汰的风险”完全一致。",
+          "source_ids": [
+            "E-004A71394ACA"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "C-015356ae778b0abc",
+          "kind": "absence",
+          "reason": "本批资料未包含2025年年度报告中关于“行业内主要竞争企业并未主动披露其在国内办公软件市场所占份额”的具体陈述段落。虽然这通常是年报中的常见免责声明，但本批提供的摘录未涵盖此内容。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-dd4ceadc8c693caf",
+          "kind": "conclusion",
+          "reason": "该结论依赖于前一条关于市场份额数据缺失的认定。由于本批未提供证明“无具体市场份额百分比排名”的直接反证或声明，且本批提供的保荐机构意见侧重于定性技术评价而非量化市场份额对比，无法仅凭本批资料确认“行业领先地位主要体现为定性描述”这一综合研判是否准确反映了所有可用证据的全貌（可能存在其他批次证据）。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-de994ed33fc38828",
+          "kind": "meta_observation",
+          "reason": "本批提供的sources确实仅包含公司官方年报数据（I-b0eb30da0fd35f16）和IPO时期的保荐机构核查意见（I-49d78e1e71b39e65, I-cf814c8f5d1218b2, I-f69c75725b45f0c2）。这些属于自我陈述或中介机构观点，确实不包含独立的员工访谈、竞品评价或合作方反馈文本。该元观察对本批资料的性质描述准确。",
+          "source_ids": [
+            "E-5D061851B6D6",
+            "E-004A71394ACA"
+          ],
+          "status": "supported"
+        }
+      ]
+    },
+    "repair_answer": {
+      "checks": [
+        {
+          "claim_id": "C-040679de57e6f1fa",
+          "kind": "direct_fact",
+          "reason": "本批提供的证据片段（年报MAU数据、保荐机构核查意见）未包含“国内领先的办公软件产品和服务提供商”或“全球先进、国内领先的办公软件厂商之一”的具体定位表述。虽然保荐机构意见提及“核心技术在国内领先”，但无法直接支持公司整体市场定位的完整措辞，且该具体定位通常出现在招股书简介或年报概述中，本批未提供对应原文。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-862a18173399f8bc",
+          "kind": "calculation",
+          "reason": "来源文本明确记载：“截至报告期末...WPS 全球月度活跃设备数达 6.78 亿，同比增长 7.29%。其中，WPS Office PC 版月度活跃设备数 3.29 亿...WPS Office 移动版月度活跃设备数 3.49 亿”。经计算，PC端(3.29) + 移动端(3.49) = 6.78亿，与总数一致；各分项数值及增长率均与主张完全匹配。注：来源为2025年年度报告，故“报告期末”即指2025年12月31日。",
+          "source_ids": [
+            "I-b0eb30da0fd35f16"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "C-fbf3c37bb360a4bf",
+          "kind": "direct_fact",
+          "reason": "本批资料仅包含2025年年报关于MAU的数据及IPO时期的保荐机构核查意见，未提供2025年10月的DAU数据或相关第三方统计记录，无法核实该特定时间点的日活数据。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-a2c249d794505815",
+          "kind": "direct_fact",
+          "reason": "来源文本支持“覆盖全球 220 多个国家和地区”这一事实。但关于“支持Windows、Linux、MacOS、Android、iOS等主流操作平台平滑应用”的具体描述在本批提供的简短摘录中未出现。鉴于任务要求判断是否支持“整条主张”，因缺少平台兼容性证据，判定为not_assessed。",
+          "source_ids": [
+            "I-b0eb30da0fd35f16"
+          ],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-4b810f5ac03d09c6",
+          "kind": "direct_fact",
+          "reason": "本批资料未包含关于《财富》世界500强中国企业服务数量或央企服务数量的具体统计数据。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-b215822d853dcc3d",
+          "kind": "direct_fact",
+          "reason": "本批资料未包含《财富》中文版2026年最受赞赏的中国公司榜单相关信息。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-d7df1d4128899177",
+          "kind": "direct_fact",
+          "reason": "本批资料未包含Google Play“顶尖开发者”称号的相关证明或披露文本。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-8dc14dd0336b285a",
+          "kind": "relationship",
+          "reason": "本批资料中的保荐机构核查意见主要关注技术先进性，未列示具体的可比同行名单（如微软、谷歌等）。虽然招股说明书通常有此列表，但本批提供的片段未包含该信息。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-960f9cb3227ebbe2",
+          "kind": "conclusion",
+          "reason": "来源文本（保荐机构核查意见）明确指出：“公司现有产品技术的先进性与国际主流产品相当，达到国际先进水平”以及“公司核心技术或产品不存在被国际、国内市场上其他技术模仿、替代、淘汰的风险”。这与主张中的“技术先进性与国际主流产品相当...不存在被其他技术模仿、替代或淘汰的风险”完全一致。",
+          "source_ids": [
+            "I-49d78e1e71b39e65",
+            "I-cf814c8f5d1218b2",
+            "I-f69c75725b45f0c2"
+          ],
+          "status": "supported"
+        },
+        {
+          "claim_id": "C-015356ae778b0abc",
+          "kind": "absence",
+          "reason": "本批资料未包含2025年年度报告中关于“行业内主要竞争企业并未主动披露其在国内办公软件市场所占份额”的具体陈述段落。虽然这通常是年报中的常见免责声明，但本批提供的摘录未涵盖此内容。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-dd4ceadc8c693caf",
+          "kind": "conclusion",
+          "reason": "该结论依赖于前一条关于市场份额数据缺失的认定。由于本批未提供证明“无具体市场份额百分比排名”的直接反证或声明，且本批提供的保荐机构意见侧重于定性技术评价而非量化市场份额对比，无法仅凭本批资料确认“行业领先地位主要体现为定性描述”这一综合研判是否准确反映了所有可用证据的全貌（可能存在其他批次证据）。",
+          "source_ids": [],
+          "status": "not_assessed"
+        },
+        {
+          "claim_id": "C-de994ed33fc38828",
+          "kind": "meta_observation",
+          "reason": "本批提供的sources确实仅包含公司官方年报数据（I-b0eb30da0fd35f16）和IPO时期的保荐机构核查意见（I-49d78e1e71b39e65, I-cf814c8f5d1218b2, I-f69c75725b45f0c2）。这些属于自我陈述或中介机构观点，确实不包含独立的员工访谈、竞品评价或合作方反馈文本。该元观察对本批资料的性质描述准确。",
+          "source_ids": [
+            "I-b0eb30da0fd35f16",
+            "I-49d78e1e71b39e65",
+            "I-cf814c8f5d1218b2",
+            "I-f69c75725b45f0c2"
+          ],
+          "status": "supported"
+        }
+      ]
+    },
+    "repair_attempted": true,
+    "role": "公司局部证据主张核验",
+    "validation_error": "invalid_scoped_claim_check"
+  },
+  "claims": [
+    {
+      "claim_id": "C-040679de57e6f1fa",
+      "text": "北京金山办公软件股份有限公司在行业内被定位为“国内领先的办公软件产品和服务提供商”及“全球先进、国内领先的办公软件厂商之一”。"
+    },
+    {
+      "claim_id": "C-862a18173399f8bc",
+      "text": "截至2025年12月，WPS全球月度活跃设备数（MAU）达6.78亿，同比增长7.29%，其中PC版MAU为3.29亿，移动版MAU为3.49亿；"
+    },
+    {
+      "claim_id": "C-fbf3c37bb360a4bf",
+      "text": "此前数据显示，截至2025年10月，WPS Office电脑端国内日活跃设备数（DAU）超1亿。"
+    },
+    {
+      "claim_id": "C-a2c249d794505815",
+      "text": "公司产品服务覆盖全球220多个国家和地区，支持Windows、Linux、MacOS、Android、iOS等主流操作平台平滑应用。"
+    },
+    {
+      "claim_id": "C-4b810f5ac03d09c6",
+      "text": "在政企市场方面，公司已服务《财富》世界500强中的120家中国企业里的69家（占比57.50%），以及国内96家央企中的82家（占比85.41%）。"
+    },
+    {
+      "claim_id": "C-b215822d853dcc3d",
+      "text": "此外，公司入选《财富》中文版2026年最受赞赏的中国公司榜单，成为唯一入选该榜单的办公软件企业；"
+    },
+    {
+      "claim_id": "C-d7df1d4128899177",
+      "text": "移动研发团队获Google Play“顶尖开发者”称号。"
+    },
+    {
+      "claim_id": "C-8dc14dd0336b285a",
+      "text": "关于同业竞争地位，招股说明书明确列示的主要可比同行包括微软、谷歌、苹果、永中软件和中标软件。"
+    },
+    {
+      "claim_id": "C-960f9cb3227ebbe2",
+      "text": "保荐机构核查认为，公司现有产品技术的先进性与国际主流产品相当，达到国际先进水平，且不存在被其他技术模仿、替代或淘汰的风险。"
+    },
+    {
+      "claim_id": "C-015356ae778b0abc",
+      "text": "然而，2025年年度报告明确披露：“报告期内，行业内主要竞争企业并未主动披露其在国内办公软件市场所占份额。"
+    },
+    {
+      "claim_id": "C-dd4ceadc8c693caf",
+      "text": "”因此，现有证据未提供公司在特定竞品或国产同行中的具体市场份额百分比排名或直接量化对比数据，“行业领先”地位主要体现为定性描述及基于用户规模绝对值的自我认定。"
+    },
+    {
+      "claim_id": "C-de994ed33fc38828",
+      "text": "本次核验的资料片段主要包含公司官方激励计划、年报中的自我陈述及第三方平台的聚合计数与宏观数据，未提供独立的员工访谈记录、竞品直接评价或合作方反馈的具体文本。"
+    }
+  ],
+  "rows": [
+    {
+      "information_id": "I-f69c75725b45f0c2",
+      "evidence_ids": [
+        "E-004A71394ACA"
+      ]
+    },
+    {
+      "information_id": "I-49d78e1e71b39e65",
+      "evidence_ids": [
+        "E-004A71394ACA"
+      ]
+    },
+    {
+      "information_id": "I-cf814c8f5d1218b2",
+      "evidence_ids": [
+        "E-004A71394ACA"
+      ]
+    },
+    {
+      "information_id": "I-b0eb30da0fd35f16",
+      "evidence_ids": [
+        "E-5D061851B6D6"
+      ]
+    }
+  ]
+}
