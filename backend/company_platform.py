@@ -1,0 +1,195 @@
+"""Account failures are collection gaps, never negative company findings."""
+import hashlib
+import json
+import os
+import re
+import time
+from datetime import datetime
+
+
+def failure_kind(payload):
+    """Classify error envelopes only; an authentic zero-result is not an error."""
+    error = payload.get('error') if isinstance(payload, dict) else payload
+    if isinstance(payload,dict) and not error:
+        envelope=payload.get('result',payload)
+        if isinstance(envelope,dict) and envelope.get('isError') is True:
+            error=envelope.get('content') or {'code':'tool_execution_error'}
+        elif str(payload.get('status') or '').lower() in {'error','failed','failure'}:
+            error={'code':payload.get('code') or payload.get('errorCode'),'message':payload.get('message') or payload.get('msg') or 'request_failed'}
+        elif payload.get('errorCode') not in (None,'',0,'0',200,'200'):
+            error={'code':payload['errorCode'],'message':payload.get('message') or payload.get('msg','')}
+    if not error:
+        return ''
+    text = json.dumps(error, ensure_ascii=False).lower()
+    if any(x in text for x in ('credit_balance_insufficient', '余额不足', '积分不足', 'quota_exceeded',
+                                '配额已用完', '配额不足', 'insufficient_quota', 'insufficient_user_quota', '可用额度不足', 'quota exceeded',
+                                'quota exhausted', 'insufficient balance')):
+        return 'quota_exceeded'
+    if re.search(r'\b401\b|unauthorized|invalid[_ -]?(?:token|api[_ -]?key)|鉴权失败|无效.{0,5}(?:密钥|令牌)', text):
+        return 'unauthorized'
+    if re.search(r'\b429\b|rate.?limit|too many requests|请求过于频繁|限流', text):
+        return 'rate_limited'
+    if re.search(r'\b403\b|forbidden|permission denied|access denied|权限不足', text):
+        return 'access_denied'
+    if any(x in text for x in ('未启用', '未配置', '未开通', 'not enabled', 'not configured', 'not_configured', 'disabled')):
+        return 'tool_unavailable'
+    return 'request_failed'
+
+
+def redact_provider_payload(payload):
+    """Preserve data values while preventing credential echoes in receipts."""
+    sensitive={'authorization','api_key','apikey','access_token','secret_key','password'}
+    secrets=[v for k,v in os.environ.items() if v and len(v)>=12 and re.search(r'(?:API_KEY|TOKEN|SECRET|PASSWORD)$',k)]
+    def clean(value):
+        if isinstance(value,dict):return {k:('[REDACTED]' if str(k).lower() in sensitive else clean(v)) for k,v in value.items()}
+        if isinstance(value,list):return [clean(v) for v in value]
+        if isinstance(value,str):
+            for secret in secrets:value=value.replace(secret,'[REDACTED]')
+            return re.sub(r'(?<![A-Za-z0-9_-])sk-[A-Za-z0-9_-]{16,}','[REDACTED]',value)
+        return value
+    return clean(payload)
+
+
+class CompanyPlatformAudit:
+    """One provider pass, with a short credential-scoped in-memory circuit."""
+    def __init__(self, project, provider, credential, cache, enabled=True, attribute='company_professional_platform_attempts', subject=''):
+        self.project, self.provider, self.enabled = project, provider, enabled
+        self.attribute, self.subject = attribute, subject
+        self.cache = cache
+        self.key = (provider, hashlib.sha256(credential.encode()).hexdigest())
+        self.plan = []
+        self.attempted = set()
+        self.failed_tools = set()
+        self.stop_reason = ''
+
+    def planned(self, tools):
+        self.plan.extend(t for t in tools if t not in self.plan)
+
+    def call(self, function, url, headers, tool, arguments, **kwargs):
+        try:
+            self._last_cache_reused=False
+            journal=getattr(self.project,'_company_flow_journal',None)
+            if journal is not None and self.attribute=='company_professional_platform_attempts':
+                value,reused=journal.platform(self.provider,tool,arguments,
+                    lambda:function(url,headers,tool,arguments,**kwargs))
+                self._last_cache_reused=reused
+                payload=value if reused else value[0]
+                self.retain_raw(tool,arguments,payload)
+                return (value,kwargs.get('session')) if reused else value
+            value=function(url, headers, tool, arguments, **kwargs)
+            self.retain_raw(tool,arguments,value[0])
+            return value
+        except Exception as exc:
+            self._transport_failure(tool, arguments, exc)
+            raise
+
+    def retain_raw(self,tool,arguments,payload):
+        if self.attribute!='company_professional_platform_attempts':return
+        from company_flow_state import fingerprint
+        journal=getattr(self.project,'_company_flow_journal',None)
+        row={'provider':self.provider,'tool':tool,'arguments':dict(arguments),'target':self.subject,
+            'retrieved_at':datetime.now().isoformat(timespec='seconds'),
+            'collection_failure':failure_kind(payload),'raw_payload':redact_provider_payload(payload)}
+        key=fingerprint([self.provider,tool,arguments,payload])
+        if journal is not None:
+            with journal.lock:
+                if key not in journal.data.setdefault('platform_raw_records',{}):
+                    journal.remember('platform_raw_records',key,row)
+        else:
+            records=getattr(self.project,'company_platform_raw_records',{})
+            records[key]=row;self.project.company_platform_raw_records=records
+
+    def initialize(self, function, *args, **kwargs):
+        try:
+            self._last_cache_reused=False
+            return function(*args, **kwargs)
+        except Exception as exc:
+            self._transport_failure('initialize', {}, exc)
+            raise
+
+    def _transport_failure(self, tool, arguments, exc):
+        if self.enabled:
+            self.result(tool, arguments, {'error': {'code': 'transport_error', 'message': type(exc).__name__}})
+            self.stop_reason = 'transport_failed'
+            self.finish_unqueried()
+
+    def record(self, tool, arguments, status, reason='', error=None):
+        if not self.enabled:
+            return
+        rows = getattr(self.project, self.attribute, None)
+        if rows is None:
+            rows = []
+            setattr(self.project, self.attribute, rows)
+        row = {'provider': self.provider, 'tool': tool, 'subject': self.subject, 'arguments': dict(arguments),
+               'status': status, 'reason': reason, 'retrieved_at': datetime.now().isoformat(timespec='seconds')}
+        if getattr(self,'_last_cache_reused',False):row['response_reused_in_task']=True
+        requirements = getattr(self.project, 'company_research_requirements', None)
+        company_context=(self.attribute=='company_professional_platform_attempts' and
+                         str(getattr(self.project,'target_type','company')).lower()=='company')
+        if requirements and company_context:
+            from company_requirements import platform_requirement_ids, VERSION
+            planned=status=='not_queried'
+            row['company_requirement_ids'] = platform_requirement_ids(requirements, self.provider, tool, arguments,planned=planned)
+            row['company_requirement_version'] = VERSION
+            row['company_requirement_binding']=('planned_not_executed' if planned else
+                'actual_arguments' if row['company_requirement_ids'] else 'unmatched')
+        if isinstance(error, dict):
+            # Keep machine diagnostics, not external instructions or credentials.
+            error=redact_provider_payload(error)
+            row['error_code'] = error.get('code')
+            data = error.get('data')
+            if isinstance(data, dict):
+                row['error_type'] = data.get('error_type')
+                row['quota_status'] = data.get('quota_status')
+        rows.append(row)
+        if self.attribute == 'company_professional_platform_attempts' and self.provider == 'qcc' and tool in {
+            'get_company_risk_scan', 'get_administrative_penalty', 'get_judicial_documents',
+            'get_judicial_document_detail', 'get_service_announcement', 'get_filing_information',
+            'get_court_announcement', 'get_hearing_announcement',
+            'get_guarantee_info', 'get_stock_pledge_info',
+        }:
+            judicial = getattr(self.project, 'company_judicial_query_attempts', None)
+            if judicial is None:
+                judicial = []
+                self.project.company_judicial_query_attempts = judicial
+            judicial.append({**row, 'query': arguments.get('searchKey', '')})
+
+    def cached_failure(self):
+        if not self.enabled:
+            return False
+        entry = self.cache.get(self.key)
+        if entry and entry[1] > time.monotonic():
+            self.stop_reason = entry[0]
+            self.finish_unqueried()
+            return True
+        self.cache.pop(self.key, None)
+        return False
+
+    def result(self, tool, arguments, payload):
+        if not self.enabled:
+            return False
+        self.attempted.add(tool)
+        reason = failure_kind(payload)
+        self.record(tool, arguments, 'failed' if reason else 'returned', reason,
+                    payload.get('error') if isinstance(payload, dict) else None)
+        if reason:
+            self.failed_tools.add(tool)
+        # A tool-specific 403 does not establish that the whole account is bad.
+        if reason in {'quota_exceeded', 'unauthorized', 'rate_limited'}:
+            self.stop_reason = reason
+            self.cache[self.key] = (reason, time.monotonic() + (60 if reason == 'rate_limited' else 900))
+            self.finish_unqueried()
+            return True
+        return False
+
+    def finish_unqueried(self):
+        for tool in self.plan:
+            if tool not in self.attempted:
+                self.record(tool, {}, 'not_queried', self.stop_reason)
+                self.attempted.add(tool)
+
+
+def restore_platform_audit(project, audit):
+    rows = audit.get('attempts') or []
+    project.company_professional_platform_attempts = rows
+    project.company_judicial_query_attempts = audit.get('judicial_query_attempts') or []
